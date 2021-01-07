@@ -15,17 +15,12 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="ad277" class="javax.swing.JTable" binding="ItemsTable">
+          <component id="ad277" class="javax.swing.JTable" binding="ItemsTable" custom-create="true">
             <constraints/>
             <properties/>
           </component>
         </children>
       </scrollpane>
-      <hspacer id="f6ace">
-        <constraints>
-          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </hspacer>
       <component id="89724" class="javax.swing.JTextField" binding="CodeInput">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
@@ -40,7 +35,10 @@
             <preferred-size width="150" height="50"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <editable value="false"/>
+          <text value="Total:"/>
+        </properties>
       </component>
       <component id="57455" class="javax.swing.JButton" binding="CodeSubmit">
         <constraints>
@@ -57,17 +55,16 @@
         </constraints>
         <properties/>
         <border type="none"/>
-        <children>
-          <component id="5f21b" class="javax.swing.JTextArea" binding="RecieptText">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="50"/>
-              </grid>
-            </constraints>
-            <properties/>
-          </component>
-        </children>
+        <children/>
       </grid>
+      <component id="d9874" class="javax.swing.JButton" binding="CardButton">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Pay By Card"/>
+        </properties>
+      </component>
       <component id="813e8" class="javax.swing.JButton" binding="CashButton">
         <constraints>
           <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -76,13 +73,13 @@
           <text value="Pay By Cash"/>
         </properties>
       </component>
-      <component id="d9874" class="javax.swing.JButton" binding="CardButton">
+      <component id="5f21b" class="javax.swing.JTextArea" binding="RecieptText">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="1" row-span="2" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
         </constraints>
-        <properties>
-          <text value="Pay By Card"/>
-        </properties>
+        <properties/>
       </component>
     </children>
   </grid>

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -24,12 +25,11 @@ public class KioskUI extends JFrame
     private JTextArea RecieptText;
     private String currentCode;
     private String[][] dataArray = new String[0][4];
-    //private String[] ColumnNames = {"Item Name", "Price"};
-    private String[][] currentItems = new String[0][2];
+    private String[] ColumnNames = {"Item Name", "Price"};
+    private String[] currentItems = new String[2];
 
     public KioskUI()
     {
-
         initialise();
     }
 
@@ -46,6 +46,8 @@ public class KioskUI extends JFrame
         pack();
         setVisible(true);
 
+        DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
+
 
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
@@ -56,23 +58,28 @@ public class KioskUI extends JFrame
                     @Override
                     public void actionPerformed(ActionEvent e)
                     {
-                        System.out.println("Submitting Code");
+                        boolean rowAdded = false;
+                        //System.out.println("Submitting Code");
                         currentCode = CodeInput.getText();
                         for(int count = 0; count < dataArray.length;)
                         {
 
                             if(dataArray[count][0].equals( currentCode))
                             {
-                                currentItems = Array2DResize(currentItems);
-                                currentItems[currentItems.length - 1][0] = dataArray[count][1];
-                                currentItems[currentItems.length - 1][1] = dataArray[count][2];
+
+                                currentItems[0] = dataArray[count][1];
+                                currentItems[1] = dataArray[count][2];
+                                rowAdded = true;
                             }
                             count++;
                         }
                         //tblItems = new JTable(currentItems.length - 1, 2);
-
-
-                        ItemsTable = createTable(currentItems);
+                        if(rowAdded)
+                        {
+                            TModel.addRow(currentItems);
+                            CodeInput.setText("");
+                            TotalCost.setText("Total: £" + TotalPrice());
+                        }
 
                     }
                 }
@@ -146,18 +153,27 @@ public class KioskUI extends JFrame
         return newArray;
     }
 
-    public static JTable createTable(String[][] itemsArray)
+    float TotalPrice()
     {
-        String[] columnNames = {"Item Name", "Price"};
-        String[][] data = itemsArray;
-        JTable table = new JTable(data, columnNames);
-        table.setFillsViewportHeight(true);
+        float total = 0;
 
-        return table;
+        for(int count = 0; count < ItemsTable.getRowCount();)
+        {
+            String strPrice = (String)ItemsTable.getValueAt(count, 1);
+            total = total + Float.parseFloat(strPrice.substring(1,(strPrice.length())));
+            count++;
+        }
+
+        return  total;
+
     }
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
+    private void createUIComponents()
+    {
+        ItemsTable = new JTable(new DefaultTableModel(ColumnNames, 0));
+
+
+
     }
 }
 
