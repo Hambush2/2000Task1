@@ -1,4 +1,4 @@
-00001    Orange Juice         £1.30    100
+00001    Orange Juice         £1.30    90
 00002    Apple Juice          £1.30    100
 00003    Cinnamon Roll        £1.00    100
 00004    4x Ring Donuts       £0.95    100
@@ -7,3 +7,4 @@
 00007    Coca Cola            £1.60    100
 00008    Toilet Rolls         £1.10    100
 00009    Hand Sanitiser       £0.80    100
+    5    9                    32  3       

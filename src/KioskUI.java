@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
@@ -23,6 +24,7 @@ public class KioskUI extends JFrame
     private JButton CashButton;
     private JButton CardButton;
     private JTextArea RecieptText;
+    private JButton StockDatabaseButton;
     private String currentCode;
     private String[][] dataArray = new String[0][4];
     private String[] ColumnNames = {"Item Name", "Price"};
@@ -40,14 +42,13 @@ public class KioskUI extends JFrame
 
     public void initialise()
     {
-        //JFrame frame = new JFrame("KioskUI");
-        setContentPane(MainPanel);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pack();
-        setVisible(true);
+        JFrame frame = new JFrame("KioskUI");
+        frame.setContentPane(MainPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
 
         DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
-
 
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
@@ -80,6 +81,20 @@ public class KioskUI extends JFrame
                             CodeInput.setText("");
                             TotalCost.setText("Total: £" + TotalPrice());
                         }
+
+                    }
+                }
+        );
+
+        StockDatabaseButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        DatabaseLogin login = new DatabaseLogin();
+                        //System.out.println("Loading Login");
+                        frame.dispose();
+
 
                     }
                 }
@@ -125,7 +140,7 @@ public class KioskUI extends JFrame
                 //Item Price
                 dataArray[rcount][2] = line.substring(30, 35);
                 //Item Quantity
-                dataArray[rcount][3] = line.substring(39, 41);
+                dataArray[rcount][3] = line.substring(39, 42);
                 rcount++;
             }
         }
