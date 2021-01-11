@@ -69,6 +69,34 @@ public class StaffStockDatabase
                             count++;
                         }
                         FileWrite(data);
+                        ReadFile(is, TModel);
+                    }
+                }
+        );
+
+        RestockButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        int rowNum = -1;
+                        String restockCode = CodeInput.getText();
+
+                        for(int count = 0; count < TableArray.length;)
+                        {
+                            if(TableArray[count][0].equals(restockCode))
+                            {
+                                rowNum = count;
+                            }
+                            count++;
+                        }
+                        if(rowNum == -1)
+                        {
+                            JOptionPane.showMessageDialog(null,   "An item with that code does not exist", "Invalid Item Code", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "Restock order sent for item " + substringBlankRemover(TableArray[rowNum][1]) + ". Please remember to update database when stock arrives", "InfoBox: " + "Restock Sent", JOptionPane.INFORMATION_MESSAGE);
+                        }
                     }
                 }
         );
@@ -116,6 +144,13 @@ public class StaffStockDatabase
                 TableArray[count][2] = Items[2] = line.substring(30, 35);
                 //Item Quantity
                 TableArray[count][3] = Items[3] = line.substring(39, 42);
+
+                String check = substringBlankRemover(TableArray[count][3]);
+                int checkValue = Integer.parseInt(check);
+                if(checkValue < 10)
+                {
+                    JOptionPane.showMessageDialog(null,  substringBlankRemover(TableArray[count][1]) + " is low on stock, please restock", "Stock Low Warning", JOptionPane.INFORMATION_MESSAGE);
+                }
 
                 Tmodel.addRow(Items);
                 count++;
@@ -169,5 +204,19 @@ public class StaffStockDatabase
             count++;
         }
         return space;
+    }
+
+    private String substringBlankRemover(String check)
+    {
+        String out = "";
+        for(int count = 0; count < check.length();)
+        {
+            if(check.charAt(count) != ' ')
+            {
+                out = out + check.charAt(count);
+            }
+            count++;
+        }
+        return out;
     }
 }

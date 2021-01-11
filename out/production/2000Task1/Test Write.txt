@@ -1,4 +1,4 @@
-00001    Orange Juice         £1.30    90  
+00001    Orange Juice         £1.30    100
 00002    Apple Juice          £1.30    100
 00003    Cinnamon Roll        £1.00    100
 00004    4x Ring Donuts       £0.95    100

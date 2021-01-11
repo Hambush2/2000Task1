@@ -59,28 +59,29 @@ public class KioskUI extends JFrame
                     @Override
                     public void actionPerformed(ActionEvent e)
                     {
-                        boolean rowAdded = false;
                         //System.out.println("Submitting Code");
                         currentCode = CodeInput.getText();
                         for(int count = 0; count < dataArray.length;)
                         {
 
-                            if(dataArray[count][0].equals( currentCode))
+                            if(dataArray[count][0].equals(currentCode))
                             {
 
                                 currentItems[0] = dataArray[count][1];
                                 currentItems[1] = dataArray[count][2];
-                                rowAdded = true;
+                                
+                                TModel.addRow(currentItems);
+                                CodeInput.setText("");
+                                TotalCost.setText("Total: £" + TotalPrice());
+                                count = dataArray.length;
+                            }
+                            else if(count == dataArray.length-1) {
+                                JOptionPane.showMessageDialog(null,   "An item with that code does not exist", "Invalid Item Code", JOptionPane.INFORMATION_MESSAGE);
+                                CodeInput.setText("");
                             }
                             count++;
                         }
                         //tblItems = new JTable(currentItems.length - 1, 2);
-                        if(rowAdded)
-                        {
-                            TModel.addRow(currentItems);
-                            CodeInput.setText("");
-                            TotalCost.setText("Total: £" + TotalPrice());
-                        }
 
                     }
                 }
@@ -96,6 +97,25 @@ public class KioskUI extends JFrame
                         frame.dispose();
 
 
+                    }
+                }
+        );
+
+        CardButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        JOptionPane.showMessageDialog(null,   "Bank would like to check that you wish to pay £" +TotalPrice()+ " via your card", "Bank Check", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+        );
+
+        CashButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        CashInput Cash = new CashInput(TotalPrice());
                     }
                 }
         );
