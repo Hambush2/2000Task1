@@ -13,14 +13,17 @@ public class CashInput
     private JTextField TotalCostText;
     private JButton PayButton;
     private JPanel MainPanel;
-    float totalCost;
+    String totalCost;
     int sum = 0;
+    String[][] currentItems;
 
-    public CashInput(float total)
+    public CashInput(String total, String[][] items)
     {
         totalCost =  total;
+        currentItems = items;
         initialise();
     }
+
 
     public void initialise()
     {
@@ -86,18 +89,47 @@ public class CashInput
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if(totalCost > sum)
+                        if(Float.parseFloat(totalCost) > sum)
                         {
                             JOptionPane.showMessageDialog(null, "Not enough cash inserted", "InfoBox: " + "Not Enough Cash Inserted", JOptionPane.INFORMATION_MESSAGE);
                         }
-                        else if(sum > totalCost)
+                        else if(sum > Float.parseFloat(totalCost))
                         {
-                            float change = sum - totalCost;
+                            float changeCalc = sum - Float.parseFloat(totalCost);
+                            String change = rounding(String.valueOf(changeCalc));
                             JOptionPane.showMessageDialog(null, "Change Due: £" + change, "InfoBox: " + "Change Due", JOptionPane.INFORMATION_MESSAGE);
+                            KioskUI kiosk = new KioskUI(currentItems);
                             frame.dispose();
                         }
                     }
                 }
         );
+    }
+    String rounding(String value)
+    {
+        String whole;
+        String deci;
+        for(int count = 0; count < value.length();)
+        {
+            if(value.charAt(count) == '.')
+            {
+                whole = value.substring(0, count);
+                deci = value.substring(count+1, value.length());
+                if(deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) >= 5)
+                {
+                    String tenth = String.valueOf(deci.charAt(0));
+                    String hundredth = String.valueOf(Integer.parseInt(String.valueOf(deci.charAt(1)))+1);
+                    deci = tenth + hundredth;
+                }
+                else if (deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) < 5)
+                {
+                    deci = String.valueOf(deci.charAt(0)) + deci.charAt(1);
+                }
+                count = value.length();
+                value = whole + "." + deci;
+            }
+            count++;
+        }
+        return value;
     }
 }

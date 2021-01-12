@@ -25,13 +25,22 @@ public class KioskUI extends JFrame
     private JButton CardButton;
     private JTextArea RecieptText;
     private JButton StockDatabaseButton;
+    private JButton RemoveItemButton;
+
     private String currentCode;
     private String[][] dataArray = new String[0][4];
     private String[] ColumnNames = {"Item Name", "Price"};
-    private String[] currentItems = new String[2];
+    private String[] addedItem = new String[2];
+    private String[][] currentItems = new String[0][2];
 
     public KioskUI()
     {
+        initialise();
+    }
+
+    public KioskUI(String[][] items)
+    {
+        currentItems = items;
         initialise();
     }
 
@@ -50,6 +59,18 @@ public class KioskUI extends JFrame
 
         DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
 
+        if(currentItems.length != 0)
+        {
+            for(int count = 0; count < currentItems.length;)
+            {
+                addedItem[0] = currentItems[count][0];
+                addedItem[1] = currentItems[count][1];
+                TModel.addRow(addedItem);
+                TotalCost.setText("Total: £" + TotalPrice());
+                count++;
+            }
+        }
+
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
         ReadFile(is);
@@ -67,10 +88,10 @@ public class KioskUI extends JFrame
                             if(dataArray[count][0].equals(currentCode))
                             {
 
-                                currentItems[0] = dataArray[count][1];
-                                currentItems[1] = dataArray[count][2];
+                                addedItem[0] = dataArray[count][1];
+                                addedItem[1] = dataArray[count][2];
                                 
-                                TModel.addRow(currentItems);
+                                TModel.addRow(addedItem);
                                 CodeInput.setText("");
                                 TotalCost.setText("Total: £" + TotalPrice());
                                 count = dataArray.length;
@@ -115,7 +136,26 @@ public class KioskUI extends JFrame
                     @Override
                     public void actionPerformed(ActionEvent e)
                     {
-                        CashInput Cash = new CashInput(TotalPrice());
+                        for(int count = 0; count < ItemsTable.getRowCount();)
+                        {
+                            currentItems = Array2DResize(currentItems);
+
+                            currentItems[count][0] = (String)ItemsTable.getValueAt(count, 0);
+                            currentItems[count][1] = (String)ItemsTable.getValueAt(count, 1);
+                            count++;
+                        }
+                        CashInput Cash = new CashInput(TotalPrice(), currentItems);
+                        frame.dispose();
+                    }
+
+                }
+        );
+
+        RemoveItemButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        TModel.removeRow(ItemsTable.getSelectedRow());
                     }
                 }
         );
@@ -188,24 +228,82 @@ public class KioskUI extends JFrame
         return newArray;
     }
 
-    float TotalPrice()
+    String TotalPrice()
     {
         float total = 0;
 
         for(int count = 0; count < ItemsTable.getRowCount();)
         {
             String strPrice = (String)ItemsTable.getValueAt(count, 1);
-            total = total + Float.parseFloat(strPrice.substring(1,(strPrice.length())));
+            total = total + Float.parseFloat(rounding(strPrice.substring(1,(strPrice.length()))));
+
             count++;
         }
+        total = Float.parseFloat(rounding(String.valueOf(total)));
+        return  TwoDecimalPlaces(total);
 
-        return  total;
+    }
+
+    String rounding(String value)
+    {
+        String whole;
+        String deci;
+        for(int count = 0; count < value.length();)
+        {
+            if(value.charAt(count) == '.')
+            {
+                whole = value.substring(0, count);
+                deci = value.substring(count+ 1, value.length());
+                if(deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) >= 5)
+                {
+                    String tenth = String.valueOf(deci.charAt(0));
+                    String hundredth = String.valueOf(Integer.parseInt(String.valueOf(deci.charAt(1)))+1);
+                    deci = tenth + hundredth;
+                }
+                else if (deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) < 5)
+                {
+                    deci = String.valueOf(deci.charAt(0)) + deci.charAt(1);
+                }
+                count = value.length();
+                value = whole + "." + deci;
+            }
+            count++;
+        }
+        return value;
+    }
+
+    String TwoDecimalPlaces(float val)
+    {
+        String value = String.valueOf(val);
+        String whole;
+        String deci;
+        for(int count = 0; count < value.length();)
+        {
+            if (value.charAt(count) == '.') {
+                whole = value.substring(0, count);
+                deci = value.substring(count + 1, value.length());
+                if(deci.length() < 2)
+                {
+                    deci = deci + "0";
+                }
+                count = value.length();
+                value = whole + "." + deci;
+            }
+            count++;
+        }
+        return value;
 
     }
 
     private void createUIComponents()
     {
-        ItemsTable = new JTable(new DefaultTableModel(ColumnNames, 0));
+        ItemsTable = new JTable(new DefaultTableModel(ColumnNames, 0){
+            @Override
+            public boolean isCellEditable(int row, int column)
+            {
+                return false;
+            }
+        });
 
 
 

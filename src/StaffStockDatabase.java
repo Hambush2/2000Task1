@@ -40,7 +40,7 @@ public class StaffStockDatabase
 
         DefaultTableModel TModel = (DefaultTableModel) DatabaseTable.getModel();
 
-        String filename = "Test Write.txt";
+        String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
         ReadFile(is, TModel);
 
@@ -97,6 +97,16 @@ public class StaffStockDatabase
                         else {
                             JOptionPane.showMessageDialog(null, "Restock order sent for item " + substringBlankRemover(TableArray[rowNum][1]) + ". Please remember to update database when stock arrives", "InfoBox: " + "Restock Sent", JOptionPane.INFORMATION_MESSAGE);
                         }
+                    }
+                }
+        );
+
+        BackButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        KioskUI kiosk = new KioskUI();
+                        frame.dispose();
                     }
                 }
         );
@@ -167,7 +177,7 @@ public class StaffStockDatabase
     {
         System.out.println("Writing to Database");
         try {
-            Files.write(Paths.get("resources/Test Write.txt"), data.getBytes());
+            Files.write(Paths.get("resources/Stock Database.txt"), data.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
