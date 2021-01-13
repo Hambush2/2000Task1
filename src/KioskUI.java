@@ -6,6 +6,8 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -30,7 +32,8 @@ public class KioskUI extends JFrame {
     private String[][] dataArray = new String[0][4];
     private String[] ColumnNames = {"Item Name", "Price"};
     private String[] addedItem = new String[2];
-    private String[][] currentItems = new String[0][2];
+    private String[][] currentItems = new String[0][3];
+    private  int CIPointer = 0; //Points to currently available row index of currentItems array
     private float changeDue;
 
     public KioskUI() {
@@ -40,9 +43,10 @@ public class KioskUI extends JFrame {
     //Constructor for coming back from CashInput
     public KioskUI(String[][] items, float change) {
         currentItems = items;
+        CIPointer = currentItems.length;
         changeDue = change;
 
-        RecieptOut();
+        CashRecieptOut();
     }
 
     public static void main(String[] args) {
@@ -58,14 +62,15 @@ public class KioskUI extends JFrame {
 
         DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
 
-        if (currentItems.length != 0) {
-            for (int count = 0; count < currentItems.length; ) {
-                addedItem[0] = currentItems[count][0];
-                addedItem[1] = currentItems[count][1];
-                TModel.addRow(addedItem);
-                TotalCost.setText("Total: £" + TotalPrice());
-                count++;
-            }
+
+
+        for (int count = 0; count < currentItems.length; )
+        {
+            addedItem[0] = currentItems[count][0];
+            addedItem[1] = currentItems[count][1];
+            TModel.addRow(addedItem);
+            TotalCost.setText("Total: £" + TotalPrice());
+            count++;
         }
 
         String filename = "Stock Database.txt";
@@ -82,12 +87,16 @@ public class KioskUI extends JFrame {
 
                             if (dataArray[count][0].equals(currentCode)) {
 
-                                addedItem[0] = dataArray[count][1];
-                                addedItem[1] = dataArray[count][2];
+                                currentItems = Array2DResize(currentItems);
+
+                                currentItems[CIPointer][0] = dataArray[count][0];
+                                addedItem[0] = currentItems[CIPointer][1] = dataArray[count][1];
+                                addedItem[1] = currentItems[CIPointer][2] = dataArray[count][2];
 
                                 TModel.addRow(addedItem);
                                 CodeInput.setText("");
                                 TotalCost.setText("Total: £" + TotalPrice());
+                                CIPointer++;
                                 count = dataArray.length;
                             } else if (count == dataArray.length - 1) {
                                 JOptionPane.showMessageDialog(null, "An item with that code does not exist", "Invalid Item Code", JOptionPane.INFORMATION_MESSAGE);
@@ -95,7 +104,6 @@ public class KioskUI extends JFrame {
                             }
                             count++;
                         }
-                        //tblItems = new JTable(currentItems.length - 1, 2);
 
                     }
                 }
@@ -120,6 +128,7 @@ public class KioskUI extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         JOptionPane.showMessageDialog(null, "Bank would like to check that you wish to pay £" + TotalPrice() + " via your card", "Bank Check", JOptionPane.INFORMATION_MESSAGE);
                         CodeInput.setEditable(false);
+                        QuantityAdjust(is);
                         RecieptText.setText(RecieptWrite());
                     }
                 }
@@ -129,13 +138,6 @@ public class KioskUI extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        for (int count = 0; count < ItemsTable.getRowCount(); ) {
-                            currentItems = Array2DResize(currentItems);
-
-                            currentItems[count][0] = (String) ItemsTable.getValueAt(count, 0);
-                            currentItems[count][1] = (String) ItemsTable.getValueAt(count, 1);
-                            count++;
-                        }
                         CashInput Cash = new CashInput(TotalPrice(), currentItems);
                         frame.dispose();
                     }
@@ -153,7 +155,7 @@ public class KioskUI extends JFrame {
         );
     }
 
-    public void RecieptOut()
+    public void CashRecieptOut()
     {
         JFrame frame = new JFrame("KioskUI");
         frame.setContentPane(MainPanel);
@@ -163,18 +165,21 @@ public class KioskUI extends JFrame {
 
         DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
 
-        if (currentItems.length != 0) {
-            for (int count = 0; count < currentItems.length; ) {
-                addedItem[0] = currentItems[count][0];
-                addedItem[1] = currentItems[count][1];
-                TModel.addRow(addedItem);
-                TotalCost.setText("Total: £" + TotalPrice());
-                count++;
-            }
+        String filename = "Stock Database.txt";
+        InputStream is = FileStream(filename);
+        ReadFile(is);
+
+        for (int count = 0; count < currentItems.length; )
+        {
+            addedItem[0] = currentItems[count][1];
+            addedItem[1] = currentItems[count][2];
+            TModel.addRow(addedItem);
+            TotalCost.setText("Total: £" + TotalPrice());
+            count++;
         }
 
         CodeInput.setEditable(false);
-
+        QuantityAdjust(is);
         RecieptText.setText(RecieptWrite() + "\n" + "Total Change:" + addSpace(17) + "£"+ changeDue);
     }
 
@@ -209,11 +214,11 @@ public class KioskUI extends JFrame {
                 //Item Code
                 dataArray[rcount][0] = line.substring(0, 5);
                 //Item Name
-                dataArray[rcount][1] = line.substring(9, 29);
+                dataArray[rcount][1] = line.substring(9, 39);
                 //Item Price
-                dataArray[rcount][2] = line.substring(30, 35);
+                dataArray[rcount][2] = line.substring(39, 48);
                 //Item Quantity
-                dataArray[rcount][3] = line.substring(39, 42);
+                dataArray[rcount][3] = line.substring(48, 51);
                 rcount++;
             }
         } catch (IOException e) {
@@ -327,7 +332,7 @@ public class KioskUI extends JFrame {
     {
         String space = "";
 
-        for(int count = 0; count <= spaces;)
+        for(int count = 0; count < spaces;)
         {
             space = space + " ";
             count++;
@@ -356,6 +361,54 @@ public class KioskUI extends JFrame {
             count++;
         }
         return out;
+    }
+
+    private void QuantityAdjust(InputStream is)
+    {
+        for(int count = 0; count < currentItems.length;)
+        {
+            for(int dcount =0; dcount < dataArray.length;)
+            {
+                if(currentItems[count][0].equals(dataArray[dcount][0]))
+                {
+                    dataArray[dcount][3] = String.valueOf(Integer.parseInt(dataArray[dcount][3]) - 1);
+                }
+                dcount++;
+            }
+            count++;
+        }
+
+        String data = "";
+        for(int count = 0; count < dataArray.length;)
+        {
+            data = data + dataArray[count][0] + addSpace(4);
+
+            String name = dataArray[count][1];
+            data = data + name + addSpace(30 - name.length());
+
+            String price = dataArray[count][2];
+            data = data + price + addSpace(9 - price.length());
+
+            data = data + dataArray[count][3];
+            if(data.length() < 51)
+            {
+                data = data + addSpace(51-data.length());
+            }
+
+            data = data + "\n";
+            count++;
+        }
+        FileWrite(data);
+        ReadFile(is);
+    }
+    void FileWrite(String data)
+    {
+        System.out.println("Writing to Database");
+        try {
+            Files.write(Paths.get("resources/Stock Database.txt"), data.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

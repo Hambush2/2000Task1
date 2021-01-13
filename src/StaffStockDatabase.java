@@ -21,6 +21,12 @@ public class StaffStockDatabase
     private JButton BackButton;
     private JPanel MainPanel;
     private JButton UpdateDBButton;
+    private JButton addItemButton;
+    private JTextField itemCodeAddText;
+    private JTextField itemNameAddText;
+    private JTextField itemPriceAddText;
+    private JTextField itemQuantityAddText;
+    private JButton removeItemButton;
 
     private String[] ColumnNames = {"Code","Name", "Price", "Quantity"};
     private String[] Items = new String[4];
@@ -44,36 +50,6 @@ public class StaffStockDatabase
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
         ReadFile(is, TModel);
-
-        UpdateDBButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e)
-                    {
-                        String data = "";
-                        for(int count = 0; count < TableArray.length;)
-                        {
-                            data = data + DatabaseTable.getValueAt(count,0) + addSpace(3);
-                            data = data + DatabaseTable.getValueAt(count, 1) + addSpace(20 - TableArray[count][1].length());
-                            data = data + DatabaseTable.getValueAt(count,2) + addSpace(3);
-                            data = data + DatabaseTable.getValueAt(count,3);
-                            if(data.length() < 42)
-                            {
-                                data = data + addSpace(42-data.length());
-                            }
-                            //String data = TableArray[count][0] + addSpace(4);
-                            //data = data + TableArray[count][1] + addSpace(23 - TableArray[count][1].length());
-                            //data = data + TableArray[count][2] + addSpace(3);
-                            //data = data + TableArray[count][3];
-
-                            data = data + "\n";
-                            count++;
-                        }
-                        FileWrite(data);
-                        ReadFile(is, TModel);
-                    }
-                }
-        );
 
         RestockButton.addActionListener(
                 new ActionListener() {
@@ -112,6 +88,51 @@ public class StaffStockDatabase
                 }
         );
 
+        addItemButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        if(itemCodeAddText.getText() != "" && itemQuantityAddText.getText() != "" && itemPriceAddText.getText() != "" && itemNameAddText.getText() != "")
+                        {
+                            String check = ItemInputCheck();
+                            if(check.equals("T"))
+                            {
+                                Items[0] = itemCodeAddText.getText();
+                                Items[1] = itemNameAddText.getText();
+                                Items[2] = "£" + itemPriceAddText.getText();
+                                Items[3] = itemQuantityAddText.getText();
+                                TModel.addRow(Items);
+
+                                updateDB(is, TModel);
+
+                                JOptionPane.showMessageDialog(null, "Added new item", "Updated Stock", JOptionPane.INFORMATION_MESSAGE);
+
+                                itemCodeAddText.setText("");
+                                itemNameAddText.setText("");
+                                itemPriceAddText.setText("");
+                                itemQuantityAddText.setText("");
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, check, "Error", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        }
+
+                    }
+                }
+        );
+
+        removeItemButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        TModel.removeRow(DatabaseTable.getSelectedRow());
+                        updateDB(is, TModel);
+                        JOptionPane.showMessageDialog(null,  "Removed new item", "Updated Stock", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+        );
+
 
     }
 
@@ -142,7 +163,7 @@ public class StaffStockDatabase
             int count = 0;
 
 
-            while ((line = reader.readLine()) != null)//.hasNextLine())
+            while ((line = reader.readLine()) != null)
             {
                 //line = reader.nextLine();
                 TableArray = Array2DResize(TableArray);
@@ -150,11 +171,11 @@ public class StaffStockDatabase
                 //Item Code
                 TableArray[count][0] = Items[0] = line.substring(0, 5);
                 //Item Name
-                TableArray[count][1] = Items[1] = line.substring(9, 29);
+                TableArray[count][1] = Items[1] = line.substring(9, 39);
                 //Item Price
-                TableArray[count][2] = Items[2] = line.substring(30, 35);
+                TableArray[count][2] = Items[2] = line.substring(39, 48);
                 //Item Quantity
-                TableArray[count][3] = Items[3] = line.substring(39, 42);
+                TableArray[count][3] = Items[3] = line.substring(48, 51);
 
                 String check = substringBlankRemover(TableArray[count][3]);
                 int checkValue = Integer.parseInt(check);
@@ -165,6 +186,7 @@ public class StaffStockDatabase
 
                 Tmodel.addRow(Items);
                 count++;
+
             }
         }
         catch (IOException e)
@@ -172,6 +194,7 @@ public class StaffStockDatabase
             System.out.println("File Not Found");
             e.printStackTrace();
         }
+
     }
 
     void FileWrite(String data)
@@ -209,7 +232,7 @@ public class StaffStockDatabase
     {
         String space = "";
 
-        for(int count = 0; count <= spaces;)
+        for(int count = 0; count < spaces;)
         {
             space = space + " ";
             count++;
@@ -229,5 +252,115 @@ public class StaffStockDatabase
             count++;
         }
         return out;
+    }
+
+    private void updateDB(InputStream is, DefaultTableModel TModel)
+    {
+        String data = "";
+        for(int count = 0; count < DatabaseTable.getRowCount();)
+        {
+            data = data + DatabaseTable.getValueAt(count,0) + addSpace(4);
+
+            String name = (String)DatabaseTable.getValueAt(count, 1);
+            data = data + name + addSpace(30 - name.length());
+
+            String price = (String) DatabaseTable.getValueAt(count, 2);
+            data = data + price + addSpace(9 - price.length());
+
+            data = data + DatabaseTable.getValueAt(count,3);
+            if(data.length() < 51)
+            {
+                data = data + addSpace(51-data.length());
+            }
+            //String data = TableArray[count][0] + addSpace(4);
+            //data = data + TableArray[count][1] + addSpace(23 - TableArray[count][1].length());
+            //data = data + TableArray[count][2] + addSpace(3);
+            //data = data + TableArray[count][3];
+
+            data = data + "\n";
+            count++;
+        }
+        FileWrite(data);
+        ReadFile(is, TModel);
+
+    }
+
+    private String ItemInputCheck()
+    {
+        //Input validation for item code
+        String error = "T";
+        if(itemCodeAddText.getText().length() > 5 || itemCodeAddText.getText().length() < 5)
+        {
+            error = "Invalid Code Length";
+        }
+        if(error.equals("T"))
+        {
+            for (int count = 0; count < DatabaseTable.getRowCount(); )
+            {
+
+                if (itemCodeAddText.getText().equals(DatabaseTable.getValueAt(count, 0)))
+                {
+                    error = "Item with code " + itemCodeAddText.getText() + " already exists";
+                    count = DatabaseTable.getRowCount();
+                }
+                count++;
+            }
+        }
+        if(error.equals("T"))
+        {
+            try {
+                Integer.parseInt(itemPriceAddText.getText());
+            } catch (Exception e) {
+                error = "Item Code cannot contain letters";
+            }
+        }
+
+        //Input validation for item name
+        if(error.equals("T"))
+        {
+            if (itemNameAddText.getText().length() > 30)
+            {
+                error = "Item Name too long";
+            }
+        }
+
+        //Input validation for item price
+        if(error.equals("T"))
+        {
+            if (itemPriceAddText.getText().length() > 8 || itemPriceAddText.getText().length() < 4)
+            {
+                error = "Price length invalid";
+            }
+        }
+        if(error.equals("T"))
+        {
+            try
+            {
+                Float.parseFloat(itemPriceAddText.getText());
+            }
+            catch(Exception e)
+            {
+                error = "Item Price must be a decimal value";
+            }
+        }
+
+        if(error.equals("T"))
+        {
+            if(itemQuantityAddText.getText().length() > 3)
+            {
+                error = "Quantity length too long";
+            }
+        }
+        if(error.equals("T"))
+        try
+        {
+            Integer.parseInt(itemPriceAddText.getText());
+        }
+        catch(Exception e)
+        {
+            error = "Item Quantity must be a whole number";
+        }
+
+        return error;
     }
 }
