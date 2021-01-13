@@ -98,7 +98,7 @@ public class CashInput
                             float changeCalc = sum - Float.parseFloat(totalCost);
                             String change = rounding(String.valueOf(changeCalc));
                             JOptionPane.showMessageDialog(null, "Change Due: £" + change, "InfoBox: " + "Change Due", JOptionPane.INFORMATION_MESSAGE);
-                            KioskUI kiosk = new KioskUI(currentItems);
+                            KioskUI kiosk = new KioskUI(currentItems, Float.parseFloat(change));
                             frame.dispose();
                         }
                     }

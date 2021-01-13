@@ -21,6 +21,7 @@ public class StaffStockDatabase
     private JButton BackButton;
     private JPanel MainPanel;
     private JButton UpdateDBButton;
+
     private String[] ColumnNames = {"Code","Name", "Price", "Quantity"};
     private String[] Items = new String[4];
     private String[][] TableArray = new String[0][4];
