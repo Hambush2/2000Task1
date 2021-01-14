@@ -389,10 +389,12 @@ public class KioskUI extends JFrame {
             String price = dataArray[count][2];
             data = data + price + addSpace(9 - price.length());
 
-            data = data + dataArray[count][3];
-            if(data.length() < 51)
+            String quantity = dataArray[count][3];
+            data = data + quantity;
+
+            if(quantity.length() < 3)
             {
-                data = data + addSpace(51-data.length());
+                data = data + addSpace(3-quantity.length());
             }
 
             data = data + "\n";

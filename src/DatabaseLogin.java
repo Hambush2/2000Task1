@@ -39,17 +39,19 @@ public class DatabaseLogin extends JFrame
             @Override
             public void actionPerformed (ActionEvent e)
             {
+                boolean valid = false;
                 for(int count = 0; count < loginArray.length;)
                 {
-                    if (UsernameTextInput.getText().equals(substringBlankRemover(loginArray[count][0])) && PasswordTextInput.getText().equals(substringBlankRemover(loginArray[count][1])))
-                    {
+                    if (UsernameTextInput.getText().equals(substringBlankRemover(loginArray[count][0])) && PasswordTextInput.getText().equals(substringBlankRemover(loginArray[count][1]))) {
                         StaffStockDatabase StaffStockDB = new StaffStockDatabase();
                         frame.dispose();
-                    } else {
-                        System.out.println("Incorrect Username or Password");
-                        System.out.println(UsernameTextInput.getText() + " " + PasswordTextInput.getText());
+                        valid = true;
                     }
                     count++;
+                }
+                if(!valid)
+                {
+                    JOptionPane.showMessageDialog(null, "Incorrect Username or password", "Invalid Credentials", JOptionPane.INFORMATION_MESSAGE);
                 }
 
             }

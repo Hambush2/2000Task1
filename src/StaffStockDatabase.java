@@ -3,12 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -27,6 +23,7 @@ public class StaffStockDatabase
     private JTextField itemPriceAddText;
     private JTextField itemQuantityAddText;
     private JButton removeItemButton;
+    private JButton commitEditsButton;
 
     private String[] ColumnNames = {"Code","Name", "Price", "Quantity"};
     private String[] Items = new String[4];
@@ -50,6 +47,16 @@ public class StaffStockDatabase
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
         ReadFile(is, TModel);
+
+        //for(int count = 0; count < TableArray.length;)
+        //{
+            // check = substringBlankRemover(TableArray[count][3]);
+            //int checkValue = Integer.parseInt(check);
+            //if (checkValue < 10) {
+                //JOptionPane.showMessageDialog(null, substringBlankRemover(TableArray[count][1]) + " is low on stock, please restock", "Stock Low Warning", JOptionPane.INFORMATION_MESSAGE);
+            //}
+            //count++;
+        //}
 
         RestockButton.addActionListener(
                 new ActionListener() {
@@ -133,6 +140,16 @@ public class StaffStockDatabase
                 }
         );
 
+        commitEditsButton.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        updateDB(is, TModel);
+                        JOptionPane.showMessageDialog(null,  "Committed Edits", "Updated Stock", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+        );
+
 
     }
 
@@ -152,7 +169,15 @@ public class StaffStockDatabase
     }
 
     //Reads in the text file and adds them to the array
-    void ReadFile(InputStream is, DefaultTableModel Tmodel) {
+    void ReadFile(InputStream is, DefaultTableModel Tmodel)
+    {
+        //int modelRows = Tmodel.getRowCount();
+        //for(int Icount = 0; Icount < modelRows;)
+        //{
+            //Tmodel.removeRow(0);
+            //Icount++;
+        //}
+
         System.out.println("Building DB Array");
         try (InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
              BufferedReader reader = new BufferedReader(streamReader))
@@ -161,7 +186,6 @@ public class StaffStockDatabase
             //Scanner reader = new Scanner(MyFile);
             String line;
             int count = 0;
-
 
             while ((line = reader.readLine()) != null)
             {
@@ -177,17 +201,12 @@ public class StaffStockDatabase
                 //Item Quantity
                 TableArray[count][3] = Items[3] = line.substring(48, 51);
 
-                String check = substringBlankRemover(TableArray[count][3]);
-                int checkValue = Integer.parseInt(check);
-                if(checkValue < 10)
-                {
-                    JOptionPane.showMessageDialog(null,  substringBlankRemover(TableArray[count][1]) + " is low on stock, please restock", "Stock Low Warning", JOptionPane.INFORMATION_MESSAGE);
-                }
 
                 Tmodel.addRow(Items);
                 count++;
 
             }
+
         }
         catch (IOException e)
         {
@@ -267,10 +286,12 @@ public class StaffStockDatabase
             String price = (String) DatabaseTable.getValueAt(count, 2);
             data = data + price + addSpace(9 - price.length());
 
-            data = data + DatabaseTable.getValueAt(count,3);
-            if(data.length() < 51)
+            String quantity = (String) DatabaseTable.getValueAt(count,3);
+            data = data + quantity;
+
+            if(quantity.length() < 3)
             {
-                data = data + addSpace(51-data.length());
+                data = data + addSpace(3-quantity.length());
             }
             //String data = TableArray[count][0] + addSpace(4);
             //data = data + TableArray[count][1] + addSpace(23 - TableArray[count][1].length());
@@ -281,6 +302,10 @@ public class StaffStockDatabase
             count++;
         }
         FileWrite(data);
+
+        //String filename = "Stock Database.txt";
+        //is = FileStream(filename);
+
         ReadFile(is, TModel);
 
     }
