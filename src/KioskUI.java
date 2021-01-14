@@ -28,14 +28,20 @@ public class KioskUI extends JFrame {
     private JButton RemoveItemButton;
     private JPanel RecieptPanel;
 
+    //The current item code
     private String currentCode;
+    //An array of the database information
     private String[][] dataArray = new String[0][4];
+    //The column names for the table/table model
     private String[] ColumnNames = {"Item Name", "Price"};
+    //array to hold the name and price data of the most recently added item
     private String[] addedItem = new String[2];
+    //array that holds the current items the user has selected
     private String[][] currentItems = new String[0][3];
     private  int CIPointer = 0; //Points to currently available row index of currentItems array
-    private float changeDue;
+    private float changeDue;//the change due from cash input
 
+    //Default Constructor
     public KioskUI() {
         initialise();
     }
@@ -60,32 +66,29 @@ public class KioskUI extends JFrame {
         frame.pack();
         frame.setVisible(true);
 
+
         DefaultTableModel TModel = (DefaultTableModel) ItemsTable.getModel();
 
-
-
-        for (int count = 0; count < currentItems.length; )
-        {
-            addedItem[0] = currentItems[count][0];
-            addedItem[1] = currentItems[count][1];
-            TModel.addRow(addedItem);
-            TotalCost.setText("Total: £" + TotalPrice());
-            count++;
-        }
-
+        //Setting up to read from the database
         String filename = "Stock Database.txt";
         InputStream is = FileStream(filename);
         ReadFile(is);
 
+        //Listener for the item code submission button
         CodeSubmit.addActionListener(
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //System.out.println("Submitting Code");
+
+                        //gets the current text value in the code input text box
                         currentCode = CodeInput.getText();
+
+                        //checks through the array for a matching code, if one is found the item data associated with that is added to the table model
+                        //and thus the table
                         for (int count = 0; count < dataArray.length; ) {
 
-                            if (dataArray[count][0].equals(currentCode)) {
+                            if (dataArray[count][0].equals(currentCode))
+                            {
 
                                 currentItems = Array2DResize(currentItems);
 
@@ -98,7 +101,9 @@ public class KioskUI extends JFrame {
                                 TotalCost.setText("Total: £" + TotalPrice());
                                 CIPointer++;
                                 count = dataArray.length;
-                            } else if (count == dataArray.length - 1) {
+                            }
+                            //If no code is matched then a message is display to inform the user
+                            else if (count == dataArray.length - 1) {
                                 JOptionPane.showMessageDialog(null, "An item with that code does not exist", "Invalid Item Code", JOptionPane.INFORMATION_MESSAGE);
                                 CodeInput.setText("");
                             }
@@ -109,19 +114,18 @@ public class KioskUI extends JFrame {
                 }
         );
 
+        //Listener for the button to take a user to the stock database management UI
         StockDatabaseButton.addActionListener(
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         DatabaseLogin login = new DatabaseLogin();
-                        //System.out.println("Loading Login");
                         frame.dispose();
-
-
                     }
                 }
         );
 
+        //Listener for the pay by card button
         CardButton.addActionListener(
                 new ActionListener() {
                     @Override
@@ -133,7 +137,7 @@ public class KioskUI extends JFrame {
                     }
                 }
         );
-
+        //Listener for the pay by cash button
         CashButton.addActionListener(
                 new ActionListener() {
                     @Override
@@ -144,17 +148,22 @@ public class KioskUI extends JFrame {
 
                 }
         );
-
+        //Listener for the Remove Item Button
         RemoveItemButton.addActionListener(
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+
+                        removeItem2DArray(currentItems, ItemsTable.getSelectedRow());
+                        TotalCost.setText("Total: £" + TotalPrice());
+                        CIPointer--;
                         TModel.removeRow(ItemsTable.getSelectedRow());
                     }
                 }
         );
     }
 
+    //Alternative to initialise() for when returning from CashInput
     public void CashRecieptOut()
     {
         JFrame frame = new JFrame("KioskUI");
@@ -183,6 +192,7 @@ public class KioskUI extends JFrame {
         RecieptText.setText(RecieptWrite() + "\n" + "Total Change:" + addSpace(17) + "£"+ changeDue);
     }
 
+    //Gets the database info as a Input Stream
     private InputStream FileStream(String fileName) {
         ClassLoader csLoader = getClass().getClassLoader();
         InputStream inStream = csLoader.getResourceAsStream(fileName);
@@ -208,7 +218,7 @@ public class KioskUI extends JFrame {
 
             while ((line = reader.readLine()) != null)//.hasNextLine())
             {
-                //line = reader.nextLine();
+                //Increasing the arrays size by 1 to account for new data
                 dataArray = Array2DResize(dataArray);
 
                 //Item Code
@@ -227,11 +237,14 @@ public class KioskUI extends JFrame {
         }
     }
 
+    //Increases a 2d array's size by 1 row
     String[][] Array2DResize(String[][] currArray) {
         int length = currArray.length;
         String[][] newArray = new String[length + 1][4];
 
-        for (int count = 0; count < length; ) {
+        for (int count = 0; count < length; )
+        {
+            //Copying the old array's data into the new, bigger array
             newArray[count][0] = currArray[count][0];
             newArray[count][1] = currArray[count][1];
             newArray[count][2] = currArray[count][2];
@@ -242,6 +255,7 @@ public class KioskUI extends JFrame {
         return newArray;
     }
 
+    //Calculates the current total price
     String TotalPrice() {
         float total = 0;
 
@@ -256,20 +270,23 @@ public class KioskUI extends JFrame {
 
     }
 
+    //reduces numbers to two decimal places
     String rounding(String value) {
         String whole;
         String deci;
         for (int count = 0; count < value.length(); ) {
-            if (value.charAt(count) == '.') {
+            if (value.charAt(count) == '.')
+            {
                 whole = value.substring(0, count);
                 deci = value.substring(count + 1, value.length());
-                if (deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) >= 5) {
-                    String tenth = String.valueOf(deci.charAt(0));
-                    String hundredth = String.valueOf(Integer.parseInt(String.valueOf(deci.charAt(1))) + 1);
-                    deci = tenth + hundredth;
-                } else if (deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) < 5) {
+                //if (deci.length() > 2 && Integer.parseInt(String.valueOf(deci.charAt(1))) >= 5) {
+                    //String tenth = String.valueOf(deci.charAt(0));
+                    //String hundredth = String.valueOf(Integer.parseInt(String.valueOf(deci.charAt(1))) + 1);
+                    //deci = tenth + hundredth;
+                 if (deci.length() > 2)
+                 {
                     deci = String.valueOf(deci.charAt(0)) + deci.charAt(1);
-                }
+                 }
                 count = value.length();
                 value = whole + "." + deci;
             }
@@ -278,6 +295,7 @@ public class KioskUI extends JFrame {
         return value;
     }
 
+    //Adds a zero if the number only has 1 decimal place
     String TwoDecimalPlaces(float val) {
         String value = String.valueOf(val);
         String whole;
@@ -298,7 +316,9 @@ public class KioskUI extends JFrame {
 
     }
 
+    //used to custom create UI components
     private void createUIComponents() {
+        //Creating a table with a model that has uneditible cells
         ItemsTable = new JTable(new DefaultTableModel(ColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -309,6 +329,7 @@ public class KioskUI extends JFrame {
 
     }
 
+    //Constructs the Reciept output
     String RecieptWrite()
     {
         String RecieptItems = "";
@@ -328,6 +349,8 @@ public class KioskUI extends JFrame {
 
         return  RecieptData;
     }
+
+    //Used to add spaces to strings, so formatting is kept in the database
     private String addSpace(int spaces)
     {
         String space = "";
@@ -340,6 +363,7 @@ public class KioskUI extends JFrame {
         return space;
     }
 
+    //Removes spaces from a string
     private String substringBlankRemover(String check)
     {
         String out = "";
@@ -363,6 +387,7 @@ public class KioskUI extends JFrame {
         return out;
     }
 
+    //Adjusts the quantities in the stock database based on selected items
     private void QuantityAdjust(InputStream is)
     {
         for(int count = 0; count < currentItems.length;)
@@ -371,7 +396,7 @@ public class KioskUI extends JFrame {
             {
                 if(currentItems[count][0].equals(dataArray[dcount][0]))
                 {
-                    dataArray[dcount][3] = String.valueOf(Integer.parseInt(dataArray[dcount][3]) - 1);
+                    dataArray[dcount][3] = String.valueOf(Integer.parseInt(substringBlankRemover(dataArray[dcount][3])) - 1);
                 }
                 dcount++;
             }
@@ -403,6 +428,8 @@ public class KioskUI extends JFrame {
         FileWrite(data);
         ReadFile(is);
     }
+
+    //Writes to a file
     void FileWrite(String data)
     {
         System.out.println("Writing to Database");
@@ -411,6 +438,50 @@ public class KioskUI extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    //Removes an item from an array and shinks the array accordingly
+    String[][] removeItem2DArray(String[][] data, int removeIndex)
+    {
+        if(removeIndex != data.length - 1)
+        {
+            data[removeIndex][0] = data[removeIndex + 1][0];
+            data[removeIndex][1] = data[removeIndex + 1][1];
+            data[removeIndex][2] = data[removeIndex + 1][2];
+            data[removeIndex][3] = data[removeIndex + 1][3];
+
+            for(int count = removeIndex + 2; count < data.length;)
+            {
+                data[count - 1][0] = data[count][0];
+                data[count - 1][1] = data[count][1];
+                data[count - 1][2] = data[count][2];
+                data[count - 1][3] = data[count][3];
+            }
+            Array2DReduce(data);
+        }
+        else{
+            Array2DReduce(data);
+        }
+        return data;
+
+    }
+
+    //Reduces an array's size by 1
+    String[][] Array2DReduce(String[][] currArray) {
+        int length = currArray.length;
+        String[][] newArray = new String[length-1][4];
+
+        for (int count = 0; count < length - 1; )
+        {
+            //Copying the old array's data into the new, bigger array
+            newArray[count][0] = currArray[count][0];
+            newArray[count][1] = currArray[count][1];
+            newArray[count][2] = currArray[count][2];
+            newArray[count][3] = currArray[count][3];
+            count++;
+        }
+
+        return newArray;
     }
 }
 
