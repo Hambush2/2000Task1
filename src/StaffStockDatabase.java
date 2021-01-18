@@ -48,15 +48,16 @@ public class StaffStockDatabase
         InputStream is = FileStream(filename);
         ReadFile(is, TModel);
 
-        //for(int count = 0; count < TableArray.length;)
-        //{
-            // check = substringBlankRemover(TableArray[count][3]);
-            //int checkValue = Integer.parseInt(check);
-            //if (checkValue < 10) {
-                //JOptionPane.showMessageDialog(null, substringBlankRemover(TableArray[count][1]) + " is low on stock, please restock", "Stock Low Warning", JOptionPane.INFORMATION_MESSAGE);
-            //}
-            //count++;
-        //}
+        for(int count = 0; count < TableArray.length;)
+        {
+            String check;
+            check = substringBlankRemover(TableArray[count][3]);
+            int checkValue = Integer.parseInt(check);
+            if (checkValue < 10) {
+                JOptionPane.showMessageDialog(null, substringBlankRemover(TableArray[count][1]) + " is low on stock, please restock", "Stock Low Warning", JOptionPane.INFORMATION_MESSAGE);
+            }
+            count++;
+        }
 
         RestockButton.addActionListener(
                 new ActionListener() {
@@ -334,7 +335,7 @@ public class StaffStockDatabase
         if(error.equals("T"))
         {
             try {
-                Integer.parseInt(itemPriceAddText.getText());
+                Integer.parseInt(itemCodeAddText.getText());
             } catch (Exception e) {
                 error = "Item Code cannot contain letters";
             }
@@ -379,7 +380,7 @@ public class StaffStockDatabase
         if(error.equals("T"))
         try
         {
-            Integer.parseInt(itemPriceAddText.getText());
+            Integer.parseInt(itemQuantityAddText.getText());
         }
         catch(Exception e)
         {
